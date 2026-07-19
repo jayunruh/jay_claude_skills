@@ -1,0 +1,44 @@
+{
+  "skill_name": "esmfold2-protein",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to predict the structure of a single protein chain. The sequence is MKTLLLTLVVVTIVCLDLGYTK. My API key is in /tmp/biohub_key.txt. Call the output 'test_monomer'.",
+      "expected_output": "Sets up pixi environment, writes input JSON with id='A', runs the prediction script, generates HTML viewer. Output files: test_monomer_model.cif, test_monomer_confidence.json, test_monomer_viewer.html.",
+      "files": [],
+      "expectations": [
+        "Input JSON is created with a single entry where id is 'A' and sequence is 'MKTLLLTLVVVTIVCLDLGYTK'",
+        "The prediction script run_esmfold2_protein_prediction.py is written to the project folder",
+        "The pixi run command is shown with the correct arguments including --key_file and --prediction_name test_monomer",
+        "A viewer HTML file is generated (or generate_viewer.py is run) with 3Dmol.js, pLDDT plot, and PAE heatmap",
+        "ipTM is noted as not applicable for a monomer"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need to predict a homodimer complex. The sequence is GAAVGGLGGYMLGSAMSRPI and I want 2 copies of it. API key at ~/.biohub_key.txt. Output prefix: myhomodimer.",
+      "expected_output": "Writes input JSON with id=['A','B'] for the two copies. Runs prediction and generates viewer showing pTM and ipTM.",
+      "files": [],
+      "expectations": [
+        "Input JSON entry has id as a list ['A','B'] (or ['A', 'B']) for the two copies of the same sequence",
+        "The sequence GAAVGGLGGYMLGSAMSRPI appears in the input JSON",
+        "The prediction script is run with --prediction_name myhomodimer",
+        "Both pTM and ipTM are displayed in the viewer (complex, not monomer)",
+        "The output CIF and confidence JSON filenames include 'myhomodimer'"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I have a heterodimer: Chain alpha (2 copies): MKTLLLTLVVVTIVCLDLGYTK, Chain beta (1 copy): GAAVGGLGGYMLGSAMSRPI. Key file: /home/user/esm_key.txt. Name it: alpha2_beta1_complex.",
+      "expected_output": "Input JSON has three entries or two entries with appropriate id arrays: chain alpha as ['A','B'], chain beta as 'C'. Runs prediction for the 3-chain complex.",
+      "files": [],
+      "expectations": [
+        "Input JSON has chain alpha with id ['A','B'] and sequence MKTLLLTLVVVTIVCLDLGYTK",
+        "Input JSON has chain beta with id 'C' and sequence GAAVGGLGGYMLGSAMSRPI",
+        "Total of 3 unique chain IDs: A, B, C",
+        "Output prefix alpha2_beta1_complex is used in the prediction command and output filenames",
+        "The viewer HTML is generated including PAE matrix and confidence scores"
+      ]
+    }
+  ]
+}
