@@ -1,0 +1,30 @@
+# Export the fitted protein model and the cryo-EM map from a ChimeraX
+# session so VMD/psfgen and mdff can work with plain PDB/MRC files.
+#
+# EDIT before use:
+#   - SESSION_FILE below
+#   - the two model numbers in the `save` commands (#N) -- inspect the
+#     session first (list_chimerax_instances / list_models via the
+#     chimerax MCP tools, or `open` it interactively) to find which
+#     model is the atomic structure and which is the volume. Don't
+#     assume #1/#2 -- confirm for this session.
+#   - the two output filenames (PROTEIN.pdb, MAP.mrc)
+#
+# Run with:
+#   run_chimerax 01_export_from_session.cxc
+# (see 00_env.sh)
+
+open SESSION_FILE.cxs
+
+# The atomic structure model may have been moved during fitting; the map
+# model usually was not. Saving PDB coordinates defaults to "scene"
+# coordinates, which already bakes in any fit -- see ChimeraX docs,
+# "save" command, "Saving Maps after Fitting". If instead the MAP was
+# moved to fit a stationary structure, swap which one gets the plain
+# save vs. needs `relModel`.
+save PROTEIN.pdb #2
+
+# If this model's own grid was not moved, it's safe to write out as-is.
+save MAP.mrc #1
+
+exit

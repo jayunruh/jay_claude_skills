@@ -1,0 +1,33 @@
+[project]
+name = "mdff-flexible-fitting"
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "osx-64", "linux-64"]
+
+[dependencies]
+python = "3.12.*"
+vmd-python = "*"
+
+# Pins the exact tk build that works with conda-forge's vmd-python on
+# osx-arm64. A newer conda-forge tk build (hbeba79b_4 at time of writing)
+# breaks vmd-python's bundled psfgen/autopsf plugins at dlopen time
+# ("Symbol not found: _strstr" in libpsfgen.so) -- if this build ever gets
+# pulled from conda-forge, re-pin to whatever build currently works
+# (verify with: pixi run vmd <any script that calls autopsf>).
+[target.osx-arm64.dependencies]
+tk = { version = "==8.6.13", build = "h892fb3f_3" }
+
+[tasks]
+vmd = "python run_vmd_tcl.py"
+
+[activation.env]
+# ssrestraints (04_make_restraints.tcl) needs an external STRIDE binary
+# for secondary-structure assignment; conda-forge's vmd-python does not
+# bundle one (VMD.app does). Without this set correctly, ssrestraints
+# silently produces an EMPTY extrabonds file ("the given selection does
+# not contain protein") instead of erroring loudly -- always check the
+# line count of the output, don't assume success from exit code alone.
+# Default below points at this machine's existing VMD.app install. On a
+# machine without VMD.app, get STRIDE directly (free, academic/
+# non-commercial license) from https://webclu.bio.wzw.tum.de/stride/,
+# compile it, and point this at that binary instead.
+STRIDE_BIN = "/Applications/VMD.app/Contents/vmd2/lib/stride_MACOSXARM64"

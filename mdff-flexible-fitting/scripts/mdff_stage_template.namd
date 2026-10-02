@@ -1,0 +1,56 @@
+###  MDFF stage template -- copy this per stage (docking, refinement,
+###  extension blocks) as 06_mdff_run1-stepN.namd and edit the block below.
+#
+# Typical staging (matches the standard MDFF tutorial two-stage docking
+# protocol, plus the extension pattern for pushing convergence further):
+#   step1: docking       TS=50000 MS=200   EXTRAB={secondary-structure/cispeptide/chirality restraints}  (no INPUTNAME -- starts from PDBFILE)
+#   step2: refinement     TS=0     MS=5000+  EXTRAB=0   INPUTNAME=step1   (restraints usually dropped once roughly docked)
+#   step3, step4, ...: extension blocks, same shape as step2, INPUTNAME = previous step's OUTPUTNAME,
+#     each continuing from the previous stage's restart files. Keep adding
+#     blocks and re-running 06_analyze_fit.tcl (stitching each new .dcd
+#     onto the DCDFILES list) until the CCC-vs-step curve visibly flattens
+#     -- don't guess a total step count up front, since convergence rate
+#     varies a lot by system/map resolution. A 50k-100k step minimization
+#     block is cheap (order of 1-5 minutes on a modern multicore desktop);
+#     re-benchmark on the actual system rather than assuming that number.
+
+set PSFFILE PROTEIN_autopsf.psf
+set PDBFILE PROTEIN_autopsf.pdb
+set GRIDPDB PROTEIN_autopsf-grid.pdb
+set GBISON 0
+set DIEL 80
+set SCALING_1_4 1.0
+set ITEMP 300
+set FTEMP 300
+set GRIDFILE MAP-grid.dx
+set GSCALE 0.3
+set EXTRAB {PROTEIN_extrabonds.txt PROTEIN_extrabonds-cispeptide.txt PROTEIN_extrabonds-chirality.txt}
+set CONSPDB 0
+set FIXPDB  0
+set GRIDON 1
+
+# set INPUTNAME <previous stage's OUTPUTNAME>   ;# omit entirely for step1
+set OUTPUTNAME mdff_run1-stepN
+
+set TS 50000
+set MS 200
+
+set MARGIN 0
+
+####################################
+
+structure $PSFFILE
+coordinates $PDBFILE
+
+paraTypeCharmm on
+parameters par_all36_prot.prm
+
+if {[info exists INPUTNAME]} {
+  BinVelocities $INPUTNAME.restart.vel
+  BinCoordinates $INPUTNAME.restart.coor
+} else {
+  temperature $ITEMP
+}
+
+
+source mdff_template.namd
